@@ -348,7 +348,7 @@ def process_data(data):
         print(f"Error decoding JSON: {e}")
 
 def udp_listener():
-    global play_game
+    global play_game, calibration_on
     avr_amplitude_front_1 = 0
     avr_amplitude_back_1 = 0
     blink_count = 0
@@ -387,6 +387,8 @@ def udp_listener():
                         blink_count_2 += 1
                 avr_amplitude_front_1 = avr_amplitude_front_2
                 blink_count = 0
+        elif calibration_on:
+            print("helloooo")
         else:
             #The game is not being played, so use blink for next and hard blink for select
             if (avr_amplitude_front_1 == avr_amplitude_front_2) and (avr_amplitude_front_2 == 0):
@@ -421,8 +423,10 @@ udp_thread = threading.Thread(target=udp_listener)
 udp_thread.daemon = True
 udp_thread.start()
 
-def check_audio():
-    global audio_exists
+def calibration():
+    global play_game, audio_exists, calibration_on
+    calibration_on = True
+    menu_active = True
     try:
         pygame.mixer.init()
         pygame.mixer.music.load(shield_on_sfx)
@@ -430,22 +434,59 @@ def check_audio():
     except pygame.error as e:
         audio_exists = False
 
+    # Get the starting time
+    start_time = pygame.time.get_ticks()
+
+    while menu_active:
+        # Calculate the elapsed time in seconds
+        elapsed_time = (pygame.time.get_ticks() - start_time) // 1000
+        countdown = 10 - elapsed_time
+
+        if countdown <= 0:
+            countdown = "Now"
+            menu_active = False  # End the loop after displaying "Now"
+
+        screen.fill(BLACK)
+        calibration_text = font.render("Calibration Settup", True, WHITE)
+        screen.blit(calibration_text, (SCREEN_WIDTH // 2 - calibration_text.get_width() // 2, SCREEN_HEIGHT // 9))
+
+        instruction_text_1 = font.render("Instruction: Do a single HARD BLINK when", True, WHITE)
+        screen.blit(instruction_text_1, (SCREEN_WIDTH // 2 - instruction_text_1.get_width() // 2, SCREEN_HEIGHT // 6))
+        instruction_text_2 = font.render('the screen says "now"', True, WHITE)
+        screen.blit(instruction_text_2, (SCREEN_WIDTH // 2 - instruction_text_2.get_width() // 2, SCREEN_HEIGHT // 5))
+
+        warning_text_1 = font.render("Note: Restart the program if calbration failed!!", True, WHITE)
+        screen.blit(warning_text_1, (SCREEN_WIDTH // 2 - warning_text_1.get_width() // 2, SCREEN_HEIGHT // 1.1))
+
+        # Render the countdown or "Now"
+        countdown_text = font.render(str(countdown), True, WHITE)
+        screen.blit(countdown_text, (SCREEN_WIDTH // 2 - countdown_text.get_width() // 2, SCREEN_HEIGHT // 2))
+
+        # Update the display
+        pygame.display.flip()
+
+        # Handle events to prevent the window from freezing
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                menu_active = False
+
+        # Limit the loop to 60 frames per second
+        pygame.time.Clock().tick(60)
+
+    # Pause for a moment after showing "Now"
+    pygame.time.wait(2000)  # 1000 milliseconds = 1 second
+    main_menu()
+
 def main_menu():
-    global play_game, audio_exists
+    global play_game, audio_exists, calibration_on
     play_game = False
     menu_active = True
     selected_option = 0
+    calibration_on = False
     options = ["Start", "Settings","Credits", "Quit"]
     # Get top scores and render the leaderboard
     top_scores = get_top_5_scores(LEADERBOARD_FILE)
     leaderboard_texts = []
-
-    # try:
-    #     pygame.mixer.init()
-    #     pygame.mixer.music.load(game_music_3)
-    #     audio_exists = True
-    # except pygame.error as e:
-    #     audio_exists = False
 
     # Start playing music when the game starts
     if (audio_exists):
@@ -457,13 +498,6 @@ def main_menu():
     for i, (name, score) in enumerate(top_scores, start=1):
         leaderboard_text = font.render(f"{i}. {name}: {score}", True, pygame.Color('white'))
         leaderboard_texts.append(leaderboard_text)
-
-    # for index, row in top_scores.iterrows():
-    #     #Store the top 5 results as a list
-    #     player_name = row['Name']
-    #     player_score = row['Score']
-    #     leaderboard_text = font.render(f"{index + 1}. {player_name}: {player_score}", True, pygame.Color('white'))
-    #     leaderboard_texts.append(leaderboard_text)
 
     while menu_active:
         screen.blit(main_menu_background, (0, 0))
@@ -1147,5 +1181,5 @@ def main_game():
 
 
 if __name__ == "__main__":
-    check_audio()
-    main_menu()
+    calibration()
+    # main_menu()cali
