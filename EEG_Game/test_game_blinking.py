@@ -108,7 +108,9 @@ logo_img = pygame.image.load(logo).convert_alpha()
 logo_img = pygame.transform.scale(logo_img, (SCREEN_WIDTH // 1.89, SCREEN_HEIGHT // 1.964))
 
 pvnet_img = pygame.image.load(pvnet_logo).convert()
+pvnet_img = pygame.transform.scale(pvnet_img, (200, 200))
 openbci_img = pygame.image.load(openbci_logo).convert()
+openbci_img = pygame.transform.scale(openbci_img, (200, 200))
 
 ship_img = rocket_image
 ship = pygame.image.load(ship_img).convert_alpha() 
@@ -576,7 +578,6 @@ def game_over_menu():
                     elif selected_option == 2: # Inputting scores
                         return "input_score"
 
-
 def credits():
     font = pygame.font.Font(None, FONT_SIZE)
     menu_active = True
@@ -585,7 +586,7 @@ def credits():
     play_game = False
 
     while menu_active:
-        screen.blit(main_menu_background, (0, 0)) 
+        screen.blit(main_menu_background, (0, 0))
         title_text = font.render("Credits", True, WHITE)
         screen.blit(title_text, (SCREEN_WIDTH // 2 - title_text.get_width() // 2, SCREEN_HEIGHT // 15))
 
@@ -598,9 +599,9 @@ def credits():
         screen.blit(openbci_img,(SCREEN_WIDTH // 2 - openbci_img.get_width() // 2 + SCREEN_WIDTH // 5, SCREEN_HEIGHT // 3.65))
 
         for i, option in enumerate(options):
-            color = (0, 255, 255) if i == selected_option else WHITE  
+            color = (0, 255, 255) if i == selected_option else WHITE
             option_text = font.render(option, True, color)
-            screen.blit(option_text, (SCREEN_WIDTH // 2 - option_text.get_width() // 2, SCREEN_HEIGHT // 3.45 + i * 60))
+            screen.blit(option_text, (SCREEN_WIDTH // 2 - option_text.get_width() // 2, SCREEN_HEIGHT // 3.45 + i * 50))
 
         acknoledgement_text_1 = font.render("Acknowledgement to OpenBCI for pioneering technology that", True, WHITE)
         screen.blit(acknoledgement_text_1,
@@ -621,7 +622,7 @@ def credits():
         special_thanks_5 = font.render("Promenade PV mall for supporting education", True, WHITE)
         screen.blit(special_thanks_5, (SCREEN_WIDTH // 2 - special_thanks_5.get_width() // 2, SCREEN_HEIGHT // 1.15))
 
-        pygame.display.flip() 
+        pygame.display.flip()
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -645,7 +646,6 @@ def credits():
                     elif selected_option == 3:  #Direct you to main menu
                         menu_active = False
                         main_menu()
-
 
 def team_member():
     font = pygame.font.Font(None, FONT_SIZE)
