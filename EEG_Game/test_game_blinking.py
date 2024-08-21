@@ -7,6 +7,7 @@ from datetime import datetime, timedelta
 import statistics
 import time
 import webbrowser
+import os
 
 # # List of files we need
 # rocket_image = "rocket2.png"
@@ -33,6 +34,7 @@ import webbrowser
 # discovery_shield = 'discovery_shield.png'
 # pvnet_logo = 'pvnet_logo.png'
 # openbci_logo = 'openbci_logo.png'
+# LEADERBOARD_FILE = "leaderboard.txt"
 
 # List of image files we need
 rocket_image = "EEG_Game/rocket2.png"
@@ -59,6 +61,7 @@ laser_ship_shield = 'EEG_Game/laser_ship_shield.png'
 discovery_shield = 'EEG_Game/discovery_shield.png'
 pvnet_logo = 'EEG_Game/pvnet_logo.png'
 openbci_logo = 'EEG_Game/openbci_logo.png'
+LEADERBOARD_FILE = "EEG_Game/leaderboard.txt"
 
 
 pygame.init()
@@ -148,6 +151,30 @@ font = pygame.font.Font(None, FONT_SIZE)
 ability_last_used = datetime.min 
 cooldown = 20
 ability_cooldown = timedelta(seconds=cooldown) 
+
+
+def save_score(name, score):
+    """Save the player's name, score, and timestamp to the leaderboard file."""
+    timestamp = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
+    with open(LEADERBOARD_FILE, 'a') as file:
+        file.write(f"{name},{score},{timestamp}\n")
+
+def get_top_5_scores(leaderboard_file):
+    """Retrieve the top 5 scores from the leaderboard file."""
+    if not os.path.exists(leaderboard_file):
+        return []
+    
+    leaderboard = []
+    with open(leaderboard_file, 'r') as file:
+        for line in file:
+            name, score, timestamp = line.strip().split(',')
+            leaderboard.append((name, int(score)))
+    
+    # Sort the leaderboard by score in descending order
+    leaderboard.sort(key=lambda x: x[1], reverse=True)
+    
+    # Return the top 5 scores
+    return leaderboard[:5]
 
 def create_pipe():
     ## This function defines a top and bottom pipe of random lengths
@@ -408,7 +435,7 @@ def main_menu():
     selected_option = 0
     options = ["Start", "Settings","Credits", "Quit"]
     # Get top scores and render the leaderboard
-    top_scores = getTopPlayers(5, CURRENT_MODE)
+    top_scores = get_top_5_scores(LEADERBOARD_FILE)
     leaderboard_texts = []
 
     # try:
@@ -424,12 +451,17 @@ def main_menu():
         pygame.mixer.music.load(game_music_3)
         pygame.mixer.music.play(-1)
 
-    for index, row in top_scores.iterrows():
-        #Store the top 5 results as a list
-        player_name = row['Name']
-        player_score = row['Score']
-        leaderboard_text = font.render(f"{index + 1}. {player_name}: {player_score}", True, pygame.Color('white'))
+
+    for i, (name, score) in enumerate(top_scores, start=1):
+        leaderboard_text = font.render(f"{i}. {name}: {score}", True, pygame.Color('white'))
         leaderboard_texts.append(leaderboard_text)
+
+    # for index, row in top_scores.iterrows():
+    #     #Store the top 5 results as a list
+    #     player_name = row['Name']
+    #     player_score = row['Score']
+    #     leaderboard_text = font.render(f"{index + 1}. {player_name}: {player_score}", True, pygame.Color('white'))
+    #     leaderboard_texts.append(leaderboard_text)
 
     while menu_active:
         screen.blit(main_menu_background, (0, 0))
@@ -496,19 +528,17 @@ def game_over_menu():
         pygame.mixer.music.play(-1) 
 
     # Draw the leaderboard
-    top_scores = getTopPlayers(5, CURRENT_MODE)
+    top_scores = get_top_5_scores(LEADERBOARD_FILE)
     leaderboard_texts = []
-    for index, row in top_scores.iterrows():
-        player_name = row['Name']
-        player_score = row['Score']
-        leaderboard_text = font.render(f"{index + 1}. {player_name}: {player_score}", True, pygame.Color('white'))
+    for i, (name, score) in enumerate(top_scores, start=1):
+        leaderboard_text = font.render(f"{i}. {name}: {score}", True, pygame.Color('white'))
         leaderboard_texts.append(leaderboard_text)
 
     while menu_active:
         screen.fill(BLACK)
 
         game_over_text = font.render("Game Over", True, WHITE)
-        score_text = font.render(f"Score: {int(score)}", True, WHITE)
+        score_text = font.render(f"Score: {int(score_reviewed)}", True, WHITE)
 
         screen.blit(game_over_text, (SCREEN_WIDTH // 2 - game_over_text.get_width() // 2, SCREEN_HEIGHT // 5))
         screen.blit(score_text, (SCREEN_WIDTH // 2 - score_text.get_width() // 2, SCREEN_HEIGHT // 4))
@@ -798,7 +828,7 @@ def difficulty():
    font = pygame.font.Font(None, FONT_SIZE)
    menu_active = True
    selected_option = 0
-   options = ["Easy", "Medium", "Hard", "Main Menu"]
+   options = ["Easy", "Medium", "Hard", "Settings"]
 
 
    while menu_active:
@@ -841,14 +871,14 @@ def difficulty():
                        settings()
                    elif selected_option == 3:  # Main Menu
                        menu_active = False
-                       main_menu()
+                       settings()
 def abilities():
     global ABILITY_COST, CURRENT_ABILITY, PIPE_GAP, PIPE_GAP_MODIFIER, ability_cooldown
 
     font = pygame.font.Font(None, FONT_SIZE)
     menu_active = True
     selected_option = 0
-    options = ["Explode Pipes", "Shield", "Bonus Score", "Larger Gaps", "Main Menu"]
+    options = ["Explode Pipes", "Shield", "Bonus Score", "Larger Gaps", "Settings"]
 
     while menu_active:
         screen.blit(main_menu_background, (0, 0))
@@ -895,7 +925,7 @@ def abilities():
                         settings()
                     elif selected_option == 4: # Main Menu
                         menu_active = False
-                        main_menu()
+                        settings()
 
 
 
@@ -947,7 +977,7 @@ def input_name(score):
     name_final =  ''.join(name)
     print(name_final)
     #Add users score to the leaderboard
-    inputScore(name_final, score, CURRENT_MODE)
+    save_score(name_final, score)
 
     main_menu()
     main_game()
