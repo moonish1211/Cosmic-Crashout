@@ -299,13 +299,15 @@ def filter_unconsious_blink(list):
     return True
 
 def filter_hard_blink(channel_1, channel_2):
+    global threshold_1, threshold_2
     #return True if list_1 goes above threshold1 and list_2 goes above threshold2 which is hard blink
-    theshold_1 = 20
-    threshold_2 = 5
-
+    if threshold_1 is None:
+        threshold_1 = 30
+    if threshold_2 is None:
+        threshold_2 = 5
     list_1_pass = False
     list_2_pass = False
-    if channel_1 > theshold_1:
+    if channel_1 > threshold_1:
         list_1_pass = True
     if channel_2 >threshold_2:
         list_2_pass = True
@@ -348,12 +350,13 @@ def process_data(data):
         print(f"Error decoding JSON: {e}")
 
 def udp_listener():
-    global play_game, calibration_on
+    global play_game, calibration_on, threshold_1, threshold_2
     avr_amplitude_front_1 = 0
     avr_amplitude_back_1 = 0
     blink_count = 0
     blink_count_2 = 0
     blink_count_3 = 0
+    calibration_count = 0
     while True:
         data, addr = sock.recvfrom(8196)
         avr_amplitude_front_2, avr_amplitude_back_2 = process_data(data)
@@ -388,7 +391,21 @@ def udp_listener():
                 avr_amplitude_front_1 = avr_amplitude_front_2
                 blink_count = 0
         elif calibration_on:
-            print("helloooo")
+            if (avr_amplitude_front_1 == avr_amplitude_front_2) and (avr_amplitude_front_2 == 0):
+                #The user is not blinking, so reset the variable
+                avr_amplitude_front_1 = 0
+                avr_amplitude_back_2 = 0
+                continue
+            elif avr_amplitude_front_1 < avr_amplitude_front_2:
+                # This means that blinks are detected
+                avr_amplitude_front_1 = avr_amplitude_front_2
+            elif (avr_amplitude_front_1 > avr_amplitude_front_2):
+                if calibration_count == 0:
+                    ##We will look at the peak of the bell curve to see for hard blink
+                    threshold_1 = avr_amplitude_front_1 - 5
+                    threshold_2 = avr_amplitude_back_1 - 2
+                    calibration_count += 1
+                avr_amplitude_front_1 = avr_amplitude_front_2
         else:
             #The game is not being played, so use blink for next and hard blink for select
             if (avr_amplitude_front_1 == avr_amplitude_front_2) and (avr_amplitude_front_2 == 0):
@@ -425,7 +442,6 @@ udp_thread.start()
 
 def calibration():
     global play_game, audio_exists, calibration_on
-    calibration_on = True
     menu_active = True
     try:
         pygame.mixer.init()
@@ -443,6 +459,7 @@ def calibration():
         countdown = 10 - elapsed_time
 
         if countdown <= 0:
+            calibration_on = True
             countdown = "Now"
             menu_active = False  # End the loop after displaying "Now"
 
@@ -1182,4 +1199,4 @@ def main_game():
 
 if __name__ == "__main__":
     calibration()
-    # main_menu()cali
+    # main_menu()
