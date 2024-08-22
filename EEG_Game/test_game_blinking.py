@@ -304,7 +304,7 @@ def filter_hard_blink(channel_1, channel_2):
     if threshold_1 is None:
         threshold_1 = 30
     if threshold_2 is None:
-        threshold_2 = 5
+        threshold_2 = 1
     list_1_pass = False
     list_2_pass = False
     if channel_1 > threshold_1:
@@ -350,7 +350,7 @@ def process_data(data):
         print(f"Error decoding JSON: {e}")
 
 def udp_listener():
-    global play_game, calibration_on, threshold_1, threshold_2
+    global play_game, calibration_on, threshold_1, threshold_2, calibration_now
     avr_amplitude_front_1 = 0
     avr_amplitude_back_1 = 0
     blink_count = 0
@@ -361,7 +361,30 @@ def udp_listener():
         data, addr = sock.recvfrom(8196)
         avr_amplitude_front_2, avr_amplitude_back_2 = process_data(data)
 
-        if play_game:
+        if calibration_on:
+            if calibration_now:
+                if (avr_amplitude_front_1 == avr_amplitude_front_2) and (avr_amplitude_front_2 == 0):
+                    #The user is not blinking, so reset the variable
+                    avr_amplitude_front_1 = 0
+                    avr_amplitude_back_1 = 0
+                    continue
+                elif avr_amplitude_front_1 < avr_amplitude_front_2:
+                    # This means that blinks are detected
+                    avr_amplitude_front_1 = avr_amplitude_front_2
+                    avr_amplitude_back_1 = avr_amplitude_back_2
+                elif (avr_amplitude_front_1 > avr_amplitude_front_2):
+                    # print("Calibration done!")
+                    if calibration_count == 0:
+                        ##We will look at the peak of the bell curve to see for hard blink
+                        threshold_1 = avr_amplitude_front_1 - 10
+                        threshold_2 = avr_amplitude_back_1 - 5
+                        if threshold_2 < 0:
+                            threshold_2 = 1
+                        print(threshold_1, threshold_2)
+                        calibration_count += 1
+                    avr_amplitude_front_1 = avr_amplitude_front_2
+                    avr_amplitude_back_1 = avr_amplitude_back_2
+        elif play_game:
             #IF we are playing the game, we use blink as jump and hard blink as ultimate
             if (avr_amplitude_front_1 == avr_amplitude_front_2) and (avr_amplitude_front_2 == 0):
                 #The user is not blinking, so reset the variable
@@ -390,22 +413,6 @@ def udp_listener():
                         blink_count_2 += 1
                 avr_amplitude_front_1 = avr_amplitude_front_2
                 blink_count = 0
-        elif calibration_on:
-            if (avr_amplitude_front_1 == avr_amplitude_front_2) and (avr_amplitude_front_2 == 0):
-                #The user is not blinking, so reset the variable
-                avr_amplitude_front_1 = 0
-                avr_amplitude_back_2 = 0
-                continue
-            elif avr_amplitude_front_1 < avr_amplitude_front_2:
-                # This means that blinks are detected
-                avr_amplitude_front_1 = avr_amplitude_front_2
-            elif (avr_amplitude_front_1 > avr_amplitude_front_2):
-                if calibration_count == 0:
-                    ##We will look at the peak of the bell curve to see for hard blink
-                    threshold_1 = avr_amplitude_front_1 - 5
-                    threshold_2 = avr_amplitude_back_1 - 2
-                    calibration_count += 1
-                avr_amplitude_front_1 = avr_amplitude_front_2
         else:
             #The game is not being played, so use blink for next and hard blink for select
             if (avr_amplitude_front_1 == avr_amplitude_front_2) and (avr_amplitude_front_2 == 0):
@@ -441,8 +448,10 @@ udp_thread.daemon = True
 udp_thread.start()
 
 def calibration():
-    global play_game, audio_exists, calibration_on
+    global play_game, audio_exists, calibration_on, calibration_now
     menu_active = True
+    calibration_on = True
+    calibration_now = False
     try:
         pygame.mixer.init()
         pygame.mixer.music.load(shield_on_sfx)
@@ -459,8 +468,8 @@ def calibration():
         countdown = 10 - elapsed_time
 
         if countdown <= 0:
-            calibration_on = True
             countdown = "Now"
+            calibration_now = True
             menu_active = False  # End the loop after displaying "Now"
 
         screen.fill(BLACK)
