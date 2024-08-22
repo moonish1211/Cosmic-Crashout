@@ -65,14 +65,17 @@ LEADERBOARD_FILE = "EEG_Game/leaderboard.txt"
 
 
 pygame.init()
+screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
+#Store the Dimention of the screen
+SCREEN_WIDTH, SCREEN_HEIGHT = screen.get_size()
 
 # Constants
 last_score_update_time = datetime.min
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
 PIPE_COLOR = (0, 255, 0)
-GRAVITY = 0.3
-SHIP_JUMP = -7
+GRAVITY = (SCREEN_HEIGHT * 0.0004166666667)
+SHIP_JUMP = -(SCREEN_HEIGHT * 0.0097222222)
 PIPE_WIDTH = 80
 PIPE_GAP = 350
 WIDTH_SHIP = 50
@@ -90,9 +93,6 @@ CURRENT_MODE = "medium"
 TIME_SINCE_SCORE_UPDATE = datetime.min
 UPDATE_COOLDOWN = timedelta(seconds=0.08)
 
-screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
-#Store the Dimention of the screen
-SCREEN_WIDTH, SCREEN_HEIGHT = screen.get_size()
 BACKGROUND_LENGTH = int(SCREEN_WIDTH * 5.43125)
 FONT_SIZE = int(SCREEN_WIDTH // 31.5)
 PIPE_SPEED = SCREEN_WIDTH // 189
@@ -108,9 +108,9 @@ logo_img = pygame.image.load(logo).convert_alpha()
 logo_img = pygame.transform.scale(logo_img, (SCREEN_WIDTH // 1.89, SCREEN_HEIGHT // 1.964))
 
 pvnet_img = pygame.image.load(pvnet_logo).convert()
-pvnet_img = pygame.transform.scale(pvnet_img, (200, 200))
+pvnet_img = pygame.transform.scale(pvnet_img, (SCREEN_WIDTH // 5.688, SCREEN_HEIGHT // 3.2))
 openbci_img = pygame.image.load(openbci_logo).convert()
-openbci_img = pygame.transform.scale(openbci_img, (200, 200))
+openbci_img = pygame.transform.scale(openbci_img, (pvnet_img.get_width(), pvnet_img.get_height()))
 
 ship_img = rocket_image
 ship = pygame.image.load(ship_img).convert_alpha() 
@@ -274,6 +274,8 @@ def draw_cooldown_timer():
         remaining_time = ability_cooldown - time_since_last_use
         remaining_seconds = remaining_time.total_seconds()
         timer_text = f"Ability ready in: {int(remaining_seconds)}s"
+    elif score < ABILITY_COST:
+        timer_text = "       Score too low"
     else:
         timer_text = "       Ability ready!"
     timer_surface = font.render(timer_text, True, WHITE)
@@ -595,21 +597,22 @@ def credits():
         team_text = font.render("Research and Development Team", True, (144, 238, 144))
         screen.blit(team_text, (SCREEN_WIDTH // 2 - team_text.get_width() // 2, SCREEN_HEIGHT // 5))
 
-        screen.blit(pvnet_img, (SCREEN_WIDTH // 2 - pvnet_img.get_width() // 2 - SCREEN_WIDTH // 5, SCREEN_HEIGHT // 3.65))
-        screen.blit(openbci_img,(SCREEN_WIDTH // 2 - openbci_img.get_width() // 2 + SCREEN_WIDTH // 5, SCREEN_HEIGHT // 3.65))
+        screen.blit(pvnet_img, (SCREEN_WIDTH // 2 - pvnet_img.get_width() // 2 - SCREEN_WIDTH // 5, SCREEN_HEIGHT // 4.025))
+        screen.blit(openbci_img,(SCREEN_WIDTH // 2 - openbci_img.get_width() // 2 + SCREEN_WIDTH // 5, SCREEN_HEIGHT // 4.025))
 
         for i, option in enumerate(options):
             color = (0, 255, 255) if i == selected_option else WHITE
             option_text = font.render(option, True, color)
-            screen.blit(option_text, (SCREEN_WIDTH // 2 - option_text.get_width() // 2, SCREEN_HEIGHT // 3.45 + i * 50))
+            screen.blit(option_text, (SCREEN_WIDTH // 2 - option_text.get_width() // 2, SCREEN_HEIGHT // 3.35 + i * SCREEN_HEIGHT // 16.3666666667))
+
 
         acknoledgement_text_1 = font.render("Acknowledgement to OpenBCI for pioneering technology that", True, WHITE)
         screen.blit(acknoledgement_text_1,
-                    (SCREEN_WIDTH // 2 - acknoledgement_text_1.get_width() // 2, SCREEN_HEIGHT // 1.8))
+                    (SCREEN_WIDTH // 2 - acknoledgement_text_1.get_width() // 2, SCREEN_HEIGHT // 1.75))
         acknoledgement_text_2 = font.render("empowers real scientific research and enriches educational opportunities.",
                                             True, WHITE)
         screen.blit(acknoledgement_text_2,
-                    (SCREEN_WIDTH // 2 - acknoledgement_text_2.get_width() // 2, SCREEN_HEIGHT // 1.7))
+                    (SCREEN_WIDTH // 2 - acknoledgement_text_2.get_width() // 2, SCREEN_HEIGHT // 1.65))
 
         special_thanks_1 = font.render("Special Thanks to:", True, WHITE)
         screen.blit(special_thanks_1, (SCREEN_WIDTH // 2 - special_thanks_1.get_width() // 2, SCREEN_HEIGHT // 1.51))
@@ -869,7 +872,7 @@ def difficulty():
                        menu_active = False
                        CURRENT_MODE = "hard"
                        settings()
-                   elif selected_option == 3:  # Main Menu
+                   elif selected_option == 3:  # Settings
                        menu_active = False
                        settings()
 def abilities():
@@ -923,7 +926,7 @@ def abilities():
                         PIPE_GAP_MODIFIER = 1.15
                         menu_active = False
                         settings()
-                    elif selected_option == 4: # Main Menu
+                    elif selected_option == 4: # Settings
                         menu_active = False
                         settings()
 
