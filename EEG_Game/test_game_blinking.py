@@ -61,6 +61,7 @@ laser_ship_shield = 'EEG_Game/laser_ship_shield.png'
 discovery_shield = 'EEG_Game/discovery_shield.png'
 pvnet_logo = 'EEG_Game/pvnet_logo.png'
 openbci_logo = 'EEG_Game/openbci_logo.png'
+shield_image = 'shield.png'
 LEADERBOARD_FILE = "EEG_Game/leaderboard.txt"
 
 
@@ -77,12 +78,9 @@ PIPE_COLOR = (0, 255, 0)
 GRAVITY = (SCREEN_HEIGHT * 0.0004166666667)
 SHIP_JUMP = -(SCREEN_HEIGHT * 0.0097222222)
 PIPE_WIDTH = 80
-PIPE_GAP = 350
-WIDTH_SHIP = 50
-HEIGHT_SHIP = 50
 BUTTON_WIDTH = 200
 BUTTON_HEIGHT = 50
-ABILITY_COST = 0 * 8 
+ABILITY_COST = 0
 PIPE_GAP_MODIFIER = 1.0
 CURRENT_ABILITY = "explode"
 SHIELD_ACTIVE = False
@@ -92,10 +90,12 @@ TIME_SINCE_CRASH = datetime.min
 CURRENT_MODE = "medium"
 TIME_SINCE_SCORE_UPDATE = datetime.min
 UPDATE_COOLDOWN = timedelta(seconds=0.08)
+HARD_BLINK_COOLDOWN = timedelta(seconds=1.0)
 
 BACKGROUND_LENGTH = int(SCREEN_WIDTH * 5.43125)
 FONT_SIZE = int(SCREEN_WIDTH // 31.5)
 PIPE_SPEED = SCREEN_WIDTH // 189
+BACKGROUND_SPEED = PIPE_SPEED // 2
 
 PIPE_GAP = int(SCREEN_HEIGHT/ 2.57 * PIPE_GAP_MODIFIER)
 # print(SCREEN_WIDTH, SCREEN_HEIGHT)
@@ -578,13 +578,6 @@ def game_over_menu():
     play_game = False
     score_reviewed = score
 
-    # try:
-    #     pygame.mixer.init()
-    #     pygame.mixer.music.load(game_music_2)
-    #     audio_exists = True
-    # except pygame.error as e:
-    #     audio_exists = False
-
     # Start playing music when the game starts
     if (audio_exists):
         pygame.mixer.init()
@@ -1055,20 +1048,15 @@ def shield_crash():
     ship = pygame.image.load(ship_img).convert_alpha() 
     ship = pygame.transform.scale(ship, (int(SCREEN_WIDTH / 16.16), int(SCREEN_HEIGHT / 20)))
 
-def enable_shield():
-    global ship, ship_img, america_shield, america, banana, banana_shield, laser_ship, rocket_image, discover, laser_ship_shield, rocket_shield, discovery_shield
+def draw_shield():
+    shield = pygame.image.load(shield_image).convert_alpha()
+    shield = pygame.transform.scale(shield, (int(SCREEN_WIDTH / 11.5), int(SCREEN_HEIGHT / 13)))
 
-    if (ship_img == banana):
-        ship = pygame.image.load(banana_shield).convert_alpha()
-    if (ship_img == america):
-        ship = pygame.image.load(america_shield).convert_alpha()
-    if (ship_img == laser_ship):
-        ship = pygame.image.load(laser_ship_shield).convert_alpha()
-    if (ship_img == rocket_image):
-        ship = pygame.image.load(rocket_shield).convert_alpha()
-    if (ship_img == discover):
-        ship = pygame.image.load(discovery_shield).convert_alpha()
-    ship = pygame.transform.scale(ship, (int(SCREEN_WIDTH / 16.16), int(SCREEN_HEIGHT / 20)))
+    rotated_shield = pygame.transform.rotate(shield, ship_rotation)
+    ship_rect = rotated_shield.get_rect(center=(ship_x, ship_y))
+
+    shield_rect = rotated_shield.get_rect(center=(ship_x, ship_y))
+    screen.blit(rotated_shield, shield_rect.topleft)
 
 
 
@@ -1085,13 +1073,7 @@ def main_game():
     running = True
     play_game = True
     ability_last_used = datetime.min
-
-    # try:
-    #     pygame.mixer.init()
-    #     pygame.mixer.music.load(game_music_1)
-    #     audio_exists = True
-    # except pygame.error as e:
-    #     audio_exists = False
+    time_since_start = datetime.now()
 
     # Start playing music when the game starts
     if (audio_exists):
@@ -1109,7 +1091,8 @@ def main_game():
         if(background_x / BACKGROUND_LENGTH <= -1 ):
             background_x = 1
 
-        background_x -= PIPE_SPEED
+        background_x -= BACKGROUND_SPEED
+        current_time = datetime.now()
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
@@ -1117,7 +1100,7 @@ def main_game():
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_SPACE:
                     ship_velocity = SHIP_JUMP
-                elif event.key == pygame.K_x:
+                elif event.key == pygame.K_x and current_time - time_since_start >= HARD_BLINK_COOLDOWN:
                     current_time = datetime.now()
                     if current_time - ability_last_used >= ability_cooldown and score >= ABILITY_COST and CURRENT_ABILITY == "explode":
                         score -= ABILITY_COST
@@ -1126,7 +1109,7 @@ def main_game():
                         if audio_exists:
                             ability_sound.play(0, 2000, 0)
                     elif current_time - ability_last_used >= ability_cooldown and score >= ABILITY_COST and CURRENT_ABILITY == "shield" and not SHIELD_ACTIVE:
-                        enable_shield()
+                        draw_shield()
                         SHIELD_ACTIVE = True
                         score -= ABILITY_COST
                         ability_last_used = current_time
@@ -1135,7 +1118,7 @@ def main_game():
                     elif current_time - ability_last_used >= ability_cooldown and score >= ABILITY_COST and CURRENT_ABILITY == "bonus score":
                         score -= ABILITY_COST
                         ability_last_used = current_time
-                        score += 5 * 8
+                        score += 5
                         if audio_exists:
                             money_sound.play(0, 2000, 0)
 
@@ -1179,6 +1162,8 @@ def main_game():
                 running = False
 
         draw_ship()
+        if SHIELD_ACTIVE:
+            draw_shield()
         draw_pipes()
         result_score = draw_score()
         draw_cooldown_timer()
@@ -1202,7 +1187,6 @@ def main_game():
         main_game()
     elif result == "main_menu":
         main_menu()
-        main_game()
     elif result == "input_score":
         input_name(result_score)
     elif result == "settings":
