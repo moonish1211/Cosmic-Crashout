@@ -4,8 +4,7 @@ Cosmic Crashout is a game that can be played by everyone, designed for quadriple
 ## Abstract
 Cosmic Crashout is a Flappy Bird inspired game using Pygame and integrated EEG data inputs from the Open BCI GUI. This is one of a few games that work with the ganglion board from Open BCI.<br><br>
 We allowed two inputs, blink and Hard-blink to select the options and play the game. 
-Additionally, each of these keys are synced to the keyboard, so this game can also be played by keyboard. 
-The global leaderboard creates a competative environment for everyone to compete for the score in top 5. 
+Additionally, each of these keys are synced to the keyboard, so this game can also be played by keyboard.  
 This project demonstrates the integration of the neurofeedback mechanism in gaming, which highlights time potential for EEG-based controls in interactive applications. 
 
 ## Game Design (Frontend)
@@ -19,7 +18,13 @@ This project demonstrates the integration of the neurofeedback mechanism in gami
 
 ### Menu
 We have multiple menus in this game<br>
-#### Main Menu: First thing we see when running the "EEG_Game/main.py" file. 
+
+#### Calibration Menu: Adjusting the Hard Blink 
+Calibration Menu will pop up first thing when you open the game.<br>
+Make sure that the Amplitude for the FFT plot is below 10 uV and perform a hard blink when the screen shows "now"
+<br><img src="Readme_image/Calibration.png" alt="Calibration plot" width="600"/>
+
+#### Main Menu:
 - Selecting "Start" will lead you to Game Menu to play the game
 - Selecting "Quit" will exit the game
 - Selecting "Settings" will navigate you to various settings in the game
@@ -83,16 +88,27 @@ EEG Analysis team first researched different controls that may be extracted for 
 <br><img src="Readme_image/blink.png" alt="Blink shown on FFT plot" width="600"/>
 <br>As you can see, whenever the subject blinks, FFT plot represent these as a concave indicating the high amplitude. From this mechanism, we decided to detect a blink whenever the amplitue first goes above 8 and when the average amplitude first starts increasing. 
 <br><img src="Readme_image/hard_blink.png" alt="Hard Blink shown on FFT plot" width="600"/>
-<br>Similarily, hard blink is detected whenever the amplitude exceed 20 on the first channel and 5 on the third channel.
-<br>
+<br>Similarily, a hard blink is detected whenever the amplitude exceeds the specified threshold that was calculated from the calibration menu.
+<br>The calibration menu forces the user to blink when the screen prints "now". Using this data, we can calculate the maximum average amplitude from hard blinks in both channels. 
+This means that the threshold is unique for each user, which allows flexibility for who can play the game.
 In order for the data to be extracted in real time, our team utilized UDP to recieve FFT data from Open BCI's GUI. 
 We filter the frequencies to range from 4.8 to 17.6 and processed the corresponding amplitude. 
 Once we detected the two controls, we synced them to the game to be played by the users.
 
-## Background
+## Background 
 
 ## Aspects of improvement
-One aspects of improvement is the number of controls. 
+Despite limited time, this project has revealed significant possibilities of what can be done to EEG headset with a Ganglion board. 
+
+<br>
+The main improvement is to add more controls. We are currently using 2 out of 4 channels offered by the Ganglion board, but these limited us to a simple blinking. 
+We have looked at other controls such as flashing lights, but inconsistency with Open BCI forced us to just give up. there is improvements (???)
+
+<br>
+Additional improvement can be made with the response time for blinking. There is a lag between hard blink done by the user and hard blink reflected on the game. This is due to how the hard blink is implemented (refer to EEG Analysis for detail)
+
+- More controls
+- Response time for blinking
 
 ## Team Member
 Ted Vegvari: Director of Research Development <br>
@@ -103,6 +119,7 @@ Tommy Nguyen: EEG Headset Electronic Integration, Visual & Asset Development, Qu
 Joshua Nwabuzor: Visual & Asset Development, BCI Interface Integration & Accessibility Development<br>
 Mark Segal: UI & Game strategy Development<br>
 Mathias Gutierrez: Sound Design<br>
+Daniel Belonio: UI & Game strategy Development<br>
 
 
 

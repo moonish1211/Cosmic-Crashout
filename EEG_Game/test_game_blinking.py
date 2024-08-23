@@ -292,6 +292,7 @@ sock.bind((UDP_IP, UDP_PORT))
 
 print(f"Listening for UDP packets on {UDP_IP}:{UDP_PORT}")
 
+last_hard_blink_time = 0
 def filter_unconsious_blink(list):
     ### Return True if amplitude is all below True. We will consider this as unconsious blinkning
     threshold = 8
@@ -301,8 +302,18 @@ def filter_unconsious_blink(list):
     return True
 
 def filter_hard_blink(channel_1, channel_2):
-    global threshold_1, threshold_2
+    global threshold_1, threshold_2, last_hard_blink_time
     #return True if list_1 goes above threshold1 and list_2 goes above threshold2 which is hard blink
+    current_time = time.time()
+    try:
+        threshold_1
+    except NameError:
+        threshold_1 = None
+    try:
+        threshold_2
+    except NameError:
+        threshold_2 = None
+
     if threshold_1 is None:
         threshold_1 = 30
     if threshold_2 is None:
@@ -315,7 +326,9 @@ def filter_hard_blink(channel_1, channel_2):
         list_2_pass = True
 
     if list_1_pass and list_2_pass:
-        return True
+        if current_time - last_hard_blink_time >= 1:
+            last_hard_blink_time = current_time
+            return True
     return False
 
 # Function to process live data
@@ -449,6 +462,15 @@ udp_thread = threading.Thread(target=udp_listener)
 udp_thread.daemon = True
 udp_thread.start()
 
+def handle_events():
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            pygame.quit()
+            sys.exit()
+        elif event.type == pygame.K_ESCAPE:
+            pygame.quit()
+            sys.exit()
+
 def calibration():
     global play_game, audio_exists, calibration_on, calibration_now
     menu_active = True
@@ -465,6 +487,7 @@ def calibration():
     start_time = pygame.time.get_ticks()
 
     while menu_active:
+        handle_events()
         # Calculate the elapsed time in seconds
         elapsed_time = (pygame.time.get_ticks() - start_time) // 1000
         countdown = 10 - elapsed_time
@@ -483,8 +506,10 @@ def calibration():
         instruction_text_2 = font.render('the screen says "now"', True, WHITE)
         screen.blit(instruction_text_2, (SCREEN_WIDTH // 2 - instruction_text_2.get_width() // 2, SCREEN_HEIGHT // 5))
 
-        warning_text_1 = font.render("Note: Restart the program if calbration failed!!", True, WHITE)
-        screen.blit(warning_text_1, (SCREEN_WIDTH // 2 - warning_text_1.get_width() // 2, SCREEN_HEIGHT // 1.1))
+        warning_text_1 = font.render("Note: Restart the program if calibration fails!!", True, WHITE)
+        screen.blit(warning_text_1, (SCREEN_WIDTH // 2 - warning_text_1.get_width() // 2, SCREEN_HEIGHT // 1.3))
+        warning_text_2 = font.render("Make sure that the uV in the FFT plot is less than 10 for both channels before continuing", True, WHITE)
+        screen.blit(warning_text_2, (SCREEN_WIDTH // 2 - warning_text_2.get_width() // 2, SCREEN_HEIGHT // 1.2))
 
         # Render the countdown or "Now"
         countdown_text = font.render(str(countdown), True, WHITE)
@@ -503,6 +528,7 @@ def calibration():
 
     # Pause for a moment after showing "Now"
     pygame.time.wait(2000)  # 1000 milliseconds = 1 second
+    time.sleep(2)
     main_menu()
 
 def main_menu():
@@ -511,6 +537,7 @@ def main_menu():
     menu_active = True
     selected_option = 0
     calibration_on = False
+    time.sleep(0.5)
     options = ["Start", "Settings","Credits", "Quit"]
     # Get top scores and render the leaderboard
     top_scores = get_top_5_scores(LEADERBOARD_FILE)
@@ -550,6 +577,9 @@ def main_menu():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
+            elif event.key == pygame.K_ESCAPE:
+                    pygame.quit()
+                    sys.exit()
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_LSHIFT or event.key == pygame.K_RSHIFT:  # Next Options
                     selected_option = (selected_option + 1) % len(options)
@@ -573,9 +603,11 @@ def main_menu():
 def game_over_menu():
     global play_game, score, audio_exists
     menu_active = True
+    time.sleep(0.5)
     selected_option = 0
     options = ["Restart", "Main Menu", "Record Score"]
     play_game = False
+    handle_events()
     score_reviewed = score
 
     # Start playing music when the game starts
@@ -618,6 +650,9 @@ def game_over_menu():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
+            elif event.key == pygame.K_ESCAPE:
+                    pygame.quit()
+                    sys.exit()
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_LSHIFT or event.key == pygame.K_RSHIFT:  # Next option
                     selected_option = (selected_option + 1) % len(options)
@@ -636,6 +671,7 @@ def game_over_menu():
 def credits():
     font = pygame.font.Font(None, FONT_SIZE)
     menu_active = True
+    time.sleep(0.5)
     selected_option = 0
     options = ["Team Members", "Direct to Abstract", "Link to Website", "Exit"]
     play_game = False
@@ -684,6 +720,9 @@ def credits():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
+            elif event.key == pygame.K_ESCAPE:
+                    pygame.quit()
+                    sys.exit()
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_LSHIFT or event.key == pygame.K_RSHIFT:  #Next option
                     selected_option = (selected_option + 1) % len(options)
@@ -706,6 +745,7 @@ def credits():
 def team_member():
     font = pygame.font.Font(None, FONT_SIZE)
     menu_active = True
+    time.sleep(0.5)
     selected_option = 0
     options = ["Exit"]
     play_game = False
@@ -752,28 +792,32 @@ def team_member():
         screen.blit(joe_role_3, (SCREEN_WIDTH // 2 - (SCREEN_WIDTH // 5), SCREEN_HEIGHT // 2.4+ (font.get_height()*2)))
 
         Tommy_text = font.render("Tommy Nguyen - ", True, WHITE)
-        screen.blit(Tommy_text, (SCREEN_WIDTH // 2 - Tommy_text.get_width()- (SCREEN_WIDTH // 5), SCREEN_HEIGHT // 1.8))
+        screen.blit(Tommy_text, (SCREEN_WIDTH // 2 - Tommy_text.get_width()- (SCREEN_WIDTH // 5), SCREEN_HEIGHT // 1.85))
         tommy_role_1 = font.render(tommy_role[0], True, WHITE)
-        screen.blit(tommy_role_1, (SCREEN_WIDTH // 2 - (SCREEN_WIDTH // 5), SCREEN_HEIGHT // 1.8))
+        screen.blit(tommy_role_1, (SCREEN_WIDTH // 2 - (SCREEN_WIDTH // 5), SCREEN_HEIGHT // 1.85))
         tommy_role_2 = font.render(tommy_role[1], True, WHITE)
-        screen.blit(tommy_role_2, (SCREEN_WIDTH // 2 - (SCREEN_WIDTH // 5), SCREEN_HEIGHT // 1.8+ font.get_height()))
+        screen.blit(tommy_role_2, (SCREEN_WIDTH // 2 - (SCREEN_WIDTH // 5), SCREEN_HEIGHT // 1.85+ font.get_height()))
         tommy_role_3 = font.render(tommy_role[2], True, WHITE)
-        screen.blit(tommy_role_3, (SCREEN_WIDTH // 2 - (SCREEN_WIDTH // 5), SCREEN_HEIGHT // 1.8+ (font.get_height()*2)))
+        screen.blit(tommy_role_3, (SCREEN_WIDTH // 2 - (SCREEN_WIDTH // 5), SCREEN_HEIGHT // 1.85+ (font.get_height()*2)))
 
         Josh_text = font.render("Joshua Nwabuzor - ", True, WHITE)
-        screen.blit(Josh_text, (SCREEN_WIDTH // 2 - Josh_text.get_width()- (SCREEN_WIDTH // 5), SCREEN_HEIGHT // 1.45))
+        screen.blit(Josh_text, (SCREEN_WIDTH // 2 - Josh_text.get_width()- (SCREEN_WIDTH // 5), SCREEN_HEIGHT // 1.5))
         Josh_text_3 = font.render("Visual & Asset Development", True, WHITE)
-        screen.blit(Josh_text_3, (SCREEN_WIDTH // 2 - (SCREEN_WIDTH // 5), SCREEN_HEIGHT // 1.45))
+        screen.blit(Josh_text_3, (SCREEN_WIDTH // 2 - (SCREEN_WIDTH // 5), SCREEN_HEIGHT // 1.5))
         Josh_text_2 = font.render("BCI Interface Integration & Accessibility Development", True, WHITE)
-        screen.blit(Josh_text_2, (SCREEN_WIDTH // 2 - (SCREEN_WIDTH // 5), SCREEN_HEIGHT // 1.45 + font.get_height()))
+        screen.blit(Josh_text_2, (SCREEN_WIDTH // 2 - (SCREEN_WIDTH // 5), SCREEN_HEIGHT // 1.5 + font.get_height()))
         Mark_text_1 = font.render("Mark Segal - ", True, WHITE)
-        screen.blit(Mark_text_1, (SCREEN_WIDTH // 2  - Mark_text_1.get_width()  - (SCREEN_WIDTH // 5), SCREEN_HEIGHT // 1.28))
+        screen.blit(Mark_text_1, (SCREEN_WIDTH // 2  - Mark_text_1.get_width()  - (SCREEN_WIDTH // 5), SCREEN_HEIGHT // 1.32))
         Mark_text_2 = font.render("UI & Game strategy Development", True, WHITE)
-        screen.blit(Mark_text_2, (SCREEN_WIDTH // 2 - (SCREEN_WIDTH // 5), SCREEN_HEIGHT // 1.28))
+        screen.blit(Mark_text_2, (SCREEN_WIDTH // 2 - (SCREEN_WIDTH // 5), SCREEN_HEIGHT // 1.32))
         mag_text_1 = font.render("Mathias Gutierrez - ", True, WHITE)
-        screen.blit(mag_text_1, (SCREEN_WIDTH // 2 - mag_text_1.get_width()- (SCREEN_WIDTH // 5), SCREEN_HEIGHT // 1.2))
+        screen.blit(mag_text_1, (SCREEN_WIDTH // 2 - mag_text_1.get_width()- (SCREEN_WIDTH // 5), SCREEN_HEIGHT // 1.25))
         mag_text_2 = font.render("Sound Design", True, WHITE)
-        screen.blit(mag_text_2, (SCREEN_WIDTH // 2 - (SCREEN_WIDTH // 5), SCREEN_HEIGHT // 1.2))
+        screen.blit(mag_text_2, (SCREEN_WIDTH // 2 - (SCREEN_WIDTH // 5), SCREEN_HEIGHT // 1.25))
+        Daniel_text_1 = font.render("Daniel Belonio - ", True, WHITE)
+        screen.blit(Daniel_text_1, (SCREEN_WIDTH // 2  - Daniel_text_1.get_width()  - (SCREEN_WIDTH // 5), SCREEN_HEIGHT // 1.18))
+        Daniel_text_2 = font.render("UI & Game strategy Development", True, WHITE)
+        screen.blit(Daniel_text_2, (SCREEN_WIDTH // 2 - (SCREEN_WIDTH // 5), SCREEN_HEIGHT // 1.18))
 
         for i, option in enumerate(options):
             color = (0, 255, 255) if i == selected_option else WHITE 
@@ -786,6 +830,9 @@ def team_member():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
+            elif event.key == pygame.K_ESCAPE:
+                    pygame.quit()
+                    sys.exit()
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_LSHIFT or event.key == pygame.K_RSHIFT: #Next option
                     selected_option = (selected_option + 1) % len(options)
@@ -796,6 +843,7 @@ def team_member():
 def settings():
     font = pygame.font.Font(None, FONT_SIZE)
     menu_active = True
+    time.sleep(0.5)
     selected_option = 0
     options = ["Styles", "Ability", "Difficulty", "Main Menu"]
     play_game = False
@@ -816,6 +864,9 @@ def settings():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
+            elif event.key == pygame.K_ESCAPE:
+                    pygame.quit()
+                    sys.exit()
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_LSHIFT or event.key == pygame.K_RSHIFT:  #Next Option
                     selected_option = (selected_option + 1) % len(options)
@@ -837,6 +888,7 @@ def styles():
 
     font = pygame.font.Font(None, FONT_SIZE)
     menu_active = True
+    time.sleep(0.5)
     selected_option = 0
     options = ["Default", "Discovery Shuttle", "Laser Ship", "AMERICA!!!", "banaannana", "Settings"]
     play_game = False
@@ -857,6 +909,9 @@ def styles():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
+            elif event.key == pygame.K_ESCAPE:
+                    pygame.quit()
+                    sys.exit()
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_LSHIFT or event.key == pygame.K_RSHIFT:  # Next Option
                     selected_option = (selected_option + 1) % len(options)
@@ -883,6 +938,7 @@ def difficulty():
 
    font = pygame.font.Font(None, FONT_SIZE)
    menu_active = True
+   time.sleep(0.5)
    selected_option = 0
    options = ["Easy", "Medium", "Hard", "Settings"]
 
@@ -909,6 +965,9 @@ def difficulty():
            elif event.type == pygame.KEYDOWN:
                if event.key == pygame.K_LSHIFT or event.key == pygame.K_RSHIFT:  # Next Option
                    selected_option = (selected_option + 1) % len(options)
+               elif event.key == pygame.K_ESCAPE:
+                    pygame.quit()
+                    sys.exit()
                elif event.key == pygame.K_RETURN:  # Select option
                    if selected_option == 0:  # Easy
                        PIPE_GAP = int(SCREEN_HEIGHT / 1.8 * PIPE_GAP_MODIFIER)
@@ -933,6 +992,7 @@ def abilities():
 
     font = pygame.font.Font(None, FONT_SIZE)
     menu_active = True
+    time.sleep(0.5)
     selected_option = 0
     options = ["Explode Pipes", "Shield", "Bonus Score", "Larger Gaps", "Settings"]
 
@@ -952,6 +1012,9 @@ def abilities():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
+            elif event.key == pygame.K_ESCAPE:
+                    pygame.quit()
+                    sys.exit()
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_LSHIFT or event.key == pygame.K_RSHIFT:  # Next Option
                     selected_option = (selected_option + 1) % len(options)
@@ -986,6 +1049,7 @@ def abilities():
 
 
 def input_name(score):
+    time.sleep(0.5)
     font = pygame.font.Font(None, FONT_SIZE)
     input_box = pygame.Rect(SCREEN_WIDTH // 2 - 100, SCREEN_HEIGHT // 2, 200, 50)
     color = pygame.Color('dodgerblue2')
@@ -1020,6 +1084,9 @@ def input_name(score):
                 if event.key == pygame.K_LSHIFT or event.key == pygame.K_RSHIFT:
                     # Cycle through character options with Shift
                     current_char_index = (current_char_index + 1) % len(character_options)
+                elif event.key == pygame.K_ESCAPE:
+                    pygame.quit()
+                    sys.exit()
                 elif event.key == pygame.K_RETURN:
                     # Confirm the character and move to the next
                     if len(name) < max_length:
@@ -1061,6 +1128,7 @@ def draw_shield():
 
 
 def main_game():
+    time.sleep(0.5)
     global background, ship_velocity, ship_rotation, ship_y, pipe_timer, pipe_list, score, score_updated, ability_last_used, play_game, SHIELD_ACTIVE, INVINCIBILITY_SECONDS, TIME_SINCE_CRASH, PIPE_SPEED, SCREEN_WIDTH, audio_exists
     ship_y = SCREEN_HEIGHT // 2
     ship_velocity = 0
