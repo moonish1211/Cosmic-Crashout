@@ -3,9 +3,20 @@ Cosmic Crashout is a game that can be played by everyone, designed for quadriple
 
 ## Abstract
 Cosmic Crashout is a Flappy Bird inspired game using Pygame and integrated EEG data inputs from the Open BCI GUI. This is one of a few games that work with the ganglion board from Open BCI.<br><br>
-We allowed two inputs, blink and Hard-blink to select the options and play the game. 
-Additionally, each of these keys are synced to the keyboard, so this game can also be played by keyboard.  
+
 This project demonstrates the integration of the neurofeedback mechanism in gaming, which highlights time potential for EEG-based controls in interactive applications. 
+The benefits of this game, Cosmic Crashout, is to integrate EEG data from the Open BCI GUI to allow playability for quadriplegics, using motor controls from eye movement rather than the use of the traditional hand control. Playability is still offered via keyboard controls.
+
+Features
+- Allows two inputs, blink and Hard-blink to select the options and play the game. 
+- Differentiation of blind and Hard-blink to control game inputs. 
+- Additionally, each of these keys are synced to the keyboard, so this game can also be played by keyboard. 
+- The global leaderboard creates a competitive environment for everyone to compete for the score in top 5. 
+
+To get started with this project, clone the repository and install the dependencies:
+
+https://github.com/Joe-Huber/Cosmic-Crashout.git
+pip install pygame
 
 ## Game Design (Frontend)
 ### Controls
@@ -57,6 +68,7 @@ Make sure that the Amplitude for the FFT plot is below 10 uV and perform a hard 
 ### Setting up Open BCI GUI
 1) Launch Open BCI GUI and connect to the Ganglion Board
 2) Check the Impedence as part of Setting Up Ganglion Board subsection (below)
+- The game performs better with lower impedance values, you should strive for values below 50 in channels 1 and 3, but high values can be tolerated as we mostly worked on values above 150
 3) Adjust the setting on FFT Plot
     - Filter only channel 1 and 3
     - Adjust the scale of the plot<br>
@@ -96,19 +108,11 @@ We filter the frequencies to range from 4.8 to 17.6 and processed the correspond
 Once we detected the two controls, we synced them to the game to be played by the users.
 
 ## Background 
+This project was made possible by PVNets amazing internship program. This goal with this project was to expand the accessibility to esports and gaming in general to quadriplegics and other disabled peoples. We were inspired by various cyborg olympics such as the cybathalon and the robohub cyborg olympics. Through our work, we hoped to share our research and developments to hopefully stand as a stepping stone for future research in this field and to act as an example for what is possible with EEG data.
 
 ## Aspects of improvement
-Despite limited time, this project has revealed significant possibilities of what can be done to EEG headset with a Ganglion board. 
-
-<br>
-The main improvement is to add more controls. We are currently using 2 out of 4 channels offered by the Ganglion board, but these limited us to a simple blinking. 
-We have looked at other controls such as flashing lights, but inconsistency with Open BCI forced us to just give up. there is improvements (???)
-
-<br>
-Additional improvement can be made with the response time for blinking. There is a lag between hard blink done by the user and hard blink reflected on the game. This is due to how the hard blink is implemented (refer to EEG Analysis for detail)
-
-- More controls
-- Response time for blinking
+One aspects of improvement is the number of controls and how we input controls. Earlier in our research, we looked into SSVEP and P300 types of input, which would give information to the game using flashing images and lights. Another type of input we researched was motor control, which we deemed too difficult when limited to 4 channels, but if we found a method for it to work, we would be able to input controls based solely on the user imagining using limbs. <br>
+Another area in which we could improve is the game design aspect. The intention behind our design was to demonstrate an example for how our method of blinking incorporated into the game, and so improvements could be made on the game design aspect. Some changes could be progressive difficulty change, more abilities and difficulties, or simply designing a new game as the current one is intended to be viewed as a prototype.
 
 ## Team Member
 Ted Vegvari: Director of Research Development <br>
