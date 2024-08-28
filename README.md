@@ -33,7 +33,7 @@ We have multiple menus in this game<br>
 #### Calibration Menu: Adjusting the Hard Blink 
 Calibration Menu will pop up first thing when you open the game.<br>
 Make sure that the Amplitude for the FFT plot is below 10 uV and perform a hard blink when the screen shows "now"
-<br><img src="Calibration.png" alt="Calibration plot" width="600"/>
+<br><img src="calibration.png" alt="Calibration plot" width="600"/>
 
 #### Main Menu:
 - Selecting "Start" will lead you to Game Menu to play the game
