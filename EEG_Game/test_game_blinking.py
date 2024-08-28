@@ -9,61 +9,61 @@ import time
 import webbrowser
 import os
 
-# List of files we need
-rocket_image = "rocket2.png"
-america = "america.png"
-banana = 'banana.png'
-discover = 'discovery.png'
-laser_ship = 'laser_ship.png'
-pipe_load_image = 'pipe.png'
-background_5_img = 'background5.png'
-main_menu_image = 'space_background.png'
-game_music_1 = 'Game music.mp3'
-game_music_2 = "Game over music.mp3"
-game_music_3 = 'Game main menu music.mp3'
-ability_sfx = 'Destroy Pipe Ability.mp3'
-crash_sfx = 'Death.mp3'
-shield_break_sfx = 'Shield Break.mp3'
-money_sfx = 'ka-ching.mp3'
-shield_on_sfx = 'Shield.mp3'
-logo = 'Logo.png'
-america_shield = 'america_shield.png'
-banana_shield = 'banana_shield.png'
-rocket_shield = 'rocket_shield.png'
-laser_ship_shield = 'laser_ship_shield.png'
-discovery_shield = 'discovery_shield.png'
-pvnet_logo = 'pvnet_logo.png'
-openbci_logo = 'openbci_logo.png'
-shield_image = 'shield.png'
-LEADERBOARD_FILE = "leaderboard.txt"
+# List of files we need if you are using Pycharm IDE
+# rocket_image = "rocket2.png"
+# america = "america.png"
+# banana = 'banana.png'
+# discover = 'discovery.png'
+# laser_ship = 'laser_ship.png'
+# pipe_load_image = 'pipe.png'
+# background_5_img = 'background5.png'
+# main_menu_image = 'space_background.png'
+# game_music_1 = 'Game music.mp3'
+# game_music_2 = "Game over music.mp3"
+# game_music_3 = 'Game main menu music.mp3'
+# ability_sfx = 'Destroy Pipe Ability.mp3'
+# crash_sfx = 'Death.mp3'
+# shield_break_sfx = 'Shield Break.mp3'
+# money_sfx = 'ka-ching.mp3'
+# shield_on_sfx = 'Shield.mp3'
+# logo = 'Logo.png'
+# america_shield = 'america_shield.png'
+# banana_shield = 'banana_shield.png'
+# rocket_shield = 'rocket_shield.png'
+# laser_ship_shield = 'laser_ship_shield.png'
+# discovery_shield = 'discovery_shield.png'
+# pvnet_logo = 'pvnet_logo.png'
+# openbci_logo = 'openbci_logo.png'
+# shield_image = 'shield.png'
+# LEADERBOARD_FILE = "leaderboard.txt"
 
-# List of image files we need
-# rocket_image = "EEG_Game/rocket2.png"
-# america = "EEG_Game/america.png"
-# banana = 'EEG_Game/banana.png'
-# discover = 'EEG_Game/discovery.png'
-# laser_ship = 'EEG_Game/laser_ship.png'
-# pipe_load_image = 'EEG_Game/pipe.png'
-# background_5_img = 'EEG_Game/background5.png'
-# main_menu_image = 'EEG_Game/space_background.png'
-# game_music_1 = 'EEG_Game/Game music.mp3'
-# game_music_2 = "EEG_Game/Game over music.mp3"
-# game_music_3 = 'EEG_Game/Game main menu music.mp3'
-# ability_sfx = 'EEG_Game/Destroy Pipe Ability.mp3'
-# crash_sfx = 'EEG_Game/Death.mp3'
-# shield_break_sfx = 'EEG_Game/Shield Break.mp3'
-# money_sfx = 'EEG_Game/ka-ching.mp3'
-# shield_on_sfx = 'EEG_Game/Shield.mp3'
-# logo = 'EEG_Game/Logo.png'
-# america_shield = 'EEG_Game/america_shield.png'
-# banana_shield = 'EEG_Game/banana_shield.png'
-# rocket_shield = 'EEG_Game/rocket_shield.png'
-# laser_ship_shield = 'EEG_Game/laser_ship_shield.png'
-# discovery_shield = 'EEG_Game/discovery_shield.png'
-# pvnet_logo = 'EEG_Game/pvnet_logo.png'
-# openbci_logo = 'EEG_Game/openbci_logo.png'
-# shield_image = 'EEG_Game/shield.png'
-# LEADERBOARD_FILE = "EEG_Game/leaderboard.txt"
+# List of image files we need if you are using VSCode IDE
+rocket_image = "EEG_Game/rocket2.png"
+america = "EEG_Game/america.png"
+banana = 'EEG_Game/banana.png'
+discover = 'EEG_Game/discovery.png'
+laser_ship = 'EEG_Game/laser_ship.png'
+pipe_load_image = 'EEG_Game/pipe.png'
+background_5_img = 'EEG_Game/background5.png'
+main_menu_image = 'EEG_Game/space_background.png'
+game_music_1 = 'EEG_Game/Game music.mp3'
+game_music_2 = "EEG_Game/Game over music.mp3"
+game_music_3 = 'EEG_Game/Game main menu music.mp3'
+ability_sfx = 'EEG_Game/Destroy Pipe Ability.mp3'
+crash_sfx = 'EEG_Game/Death.mp3'
+shield_break_sfx = 'EEG_Game/Shield Break.mp3'
+money_sfx = 'EEG_Game/ka-ching.mp3'
+shield_on_sfx = 'EEG_Game/Shield.mp3'
+logo = 'EEG_Game/Logo.png'
+america_shield = 'EEG_Game/america_shield.png'
+banana_shield = 'EEG_Game/banana_shield.png'
+rocket_shield = 'EEG_Game/rocket_shield.png'
+laser_ship_shield = 'EEG_Game/laser_ship_shield.png'
+discovery_shield = 'EEG_Game/discovery_shield.png'
+pvnet_logo = 'EEG_Game/pvnet_logo.png'
+openbci_logo = 'EEG_Game/openbci_logo.png'
+shield_image = 'EEG_Game/shield.png'
+LEADERBOARD_FILE = "EEG_Game/leaderboard.txt"
 
 
 pygame.init()
@@ -298,7 +298,6 @@ sock.bind((UDP_IP, UDP_PORT))
 
 print(f"Listening for UDP packets on {UDP_IP}:{UDP_PORT}")
 
-last_hard_blink_time = 0
 
 
 def filter_unconsious_blink(list):
@@ -311,7 +310,7 @@ def filter_unconsious_blink(list):
 
 
 def filter_hard_blink(channel_1, channel_2):
-    global threshold_1, threshold_2, last_hard_blink_time
+    global threshold_1, threshold_2
     # return True if list_1 goes above threshold1 and list_2 goes above threshold2 which is hard blink
     current_time = time.time()
     try:
@@ -981,12 +980,11 @@ def difficulty():
        screen.blit(main_menu_background, (0, 0)) 
        title_text = font.render("Difficulty", True, WHITE)
        screen.blit(title_text, (SCREEN_WIDTH // 2 - title_text.get_width() // 2, SCREEN_HEIGHT // 5))
-
-        for i, option in enumerate(options):
-            color = (0, 255, 255) if i == selected_option else (240, 240, 240)
-            option_text = font.render(option, True, color)
-            screen.blit(option_text, (SCREEN_WIDTH // 2 - option_text.get_width() // 2, SCREEN_HEIGHT // 2.5 + i * 60))
-
+       for i, option in enumerate(options):
+        color = (0, 255, 255) if i == selected_option else (240, 240, 240)
+        option_text = font.render(option, True, color)
+        screen.blit(option_text, (SCREEN_WIDTH // 2 - option_text.get_width() // 2, SCREEN_HEIGHT // 2.5 + i * 60))
+            
         pygame.display.flip()
 
 
@@ -1140,7 +1138,7 @@ def input_name(score):
                         done = True
 
     name_final = ''.join(name)
-    print(name_final)
+    # print(name_final)
     # Add users score to the leaderboard
     save_score(name_final, score)
 
@@ -1306,4 +1304,3 @@ def main_game():
 
 if __name__ == "__main__":
     calibration()
-    # main_menu()

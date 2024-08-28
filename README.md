@@ -11,7 +11,7 @@ Features
 - Allows two inputs, blink and Hard-blink to select the options and play the game. 
 - Differentiation of blind and Hard-blink to control game inputs. 
 - Additionally, each of these keys are synced to the keyboard, so this game can also be played by keyboard. 
-- The global leaderboard creates a competitive environment for everyone to compete for the score in top 5. 
+- The Local leaderboard creates a competitive environment for everyone to compete for the score in top 5. 
 
 To get started with this project, clone the repository and install the dependencies:
 
@@ -53,7 +53,7 @@ Make sure that the Amplitude for the FFT plot is below 10 uV and perform a hard 
 - Selecting "Main Menu" will go back to the Main Menu
 - Selecting "Record Score" will pull you to Record Score Menu
 
-#### Record Score Menu: Allow you to input your initial to store the score on the global leaderboard
+#### Record Score Menu: Allow you to input your initial to store the score on the Local leaderboard
 - Have A-Z and space as a character option
 - We allow maximum of 3 character as your name
 - Redirects you to the Main Menu after selecting all 3 characters
